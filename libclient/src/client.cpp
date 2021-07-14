@@ -4,6 +4,7 @@
 #include <asio/ts/net.hpp>
 #include <asio/experimental/as_tuple.hpp>
 #include <asio/experimental/awaitable_operators.hpp>
+#include "client.h"
 
 constexpr auto use_nothrow_awaitable = asio::experimental::as_tuple(asio::use_awaitable);
 
@@ -32,8 +33,9 @@ asio::awaitable<std::error_code> session(asio::ip::tcp::socket socket,
 	co_return std::error_code{};
 }
 
-std::error_code connect_to(const asio::ip::tcp::endpoint &endpoint)
+std::error_code client::connect_to(std::string_view host, unsigned short port)
 {
+	asio::ip::tcp::endpoint endpoint(asio::ip::make_address(host), port);
 	asio::io_context io_context;
 	auto connect_future = asio::co_spawn(io_context.get_executor(),
 		session(asio::ip::tcp::socket(io_context), endpoint), asio::use_future);
@@ -41,13 +43,3 @@ std::error_code connect_to(const asio::ip::tcp::endpoint &endpoint)
 	return connect_future.get();
 }
 
-int main()
-{
-	asio::ip::tcp::endpoint target(asio::ip::make_address("192.168.190.69"), 123);
-	auto error = connect_to(target);
-	if (error)
-		printf("%s\n", error.message().c_str());
-	else
-		printf("Success\n");
-	return 0;
-}
