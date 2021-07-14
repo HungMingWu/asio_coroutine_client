@@ -1,0 +1,7 @@
+﻿cmake_minimum_required (VERSION 3.10)
+project (asio_client CXX)
+find_package(Threads REQUIRED)
+add_subdirectory(asio)
+add_executable(client client.cpp)
+target_compile_features(client PUBLIC cxx_std_20)
+target_link_libraries(client PUBLIC asio Threads::Threads)
